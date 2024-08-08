@@ -49,7 +49,7 @@ loaded_model = mlflow.pyfunc.load_model(model_version_uri)
 
 # COMMAND ----------
 
-
+loaded_model.predict(wind_turbines_clean_sdf.drop("wt_sk", "subtraction").toPandas())
 
 # COMMAND ----------
 
