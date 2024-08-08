@@ -153,3 +153,9 @@ dbutils.notebook.exit("End of notebook when running as a workflow task")
 # MAGIC * Impute missing data
 # MAGIC
 # MAGIC **Next:** Go to the Gold Notebook and continue from there
+
+# COMMAND ----------
+
+# MAGIC %environment
+# MAGIC "client": "1"
+# MAGIC "base_environment": ""
