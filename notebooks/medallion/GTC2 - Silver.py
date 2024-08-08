@@ -19,7 +19,6 @@ import matplotlib.pyplot as plt
 # ********* workflow parameters ********* #
 # set parameters here only if running notebook, for example:
 # dbutils.widgets.text("CATALOG_NAME", "konstantinos_ninas")
-# dbutils.widgets.text("OVERWRITE_TABLE", "False")
 
 # COMMAND ----------
 

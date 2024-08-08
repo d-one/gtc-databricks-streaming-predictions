@@ -64,41 +64,6 @@ with mlflow.start_run(run_name="wind-turbines-decision-tree") as mlflow_run:
 
 # COMMAND ----------
 
-latest_model_version = client.get_model_version_by_alias(name=model_name, alias="Baseline").version
-model_uri = f"models:/{model_name}/{latest_model_version}" # Should be version 1
-# model_uri = f"models:/{model_name}@baseline # uri can also point to @alias
-predict_func = mlflow.pyfunc.spark_udf(
-    spark,
-    model_uri)
-
-# COMMAND ----------
-
-# prepare test dataset
-test_features_df = test_df.drop("subtraction")
-
-# make prediction
-prediction_df = test_features_df.withColumn("prediction", predict_func(*test_features_df.drop("wt_sk").columns))
-
-display(prediction_df)
-
-# COMMAND ----------
-
-wind_turbine_predictions_sdf = (
-    test_df
-    .select("wt_sk", "wind_speed", "power", "subtraction")
-    .join(
-        prediction_df
-        ,["wt_sk", "wind_speed", "power"]
-        ,"inner"
-    )
-)
-
-# COMMAND ----------
-
-wind_turbine_predictions_sdf.write.format("delta").mode("overwrite").saveAsTable("konstantinos_ninas.gold.wind_turbine_predictions")
-
-# COMMAND ----------
-
 
 
 # COMMAND ----------
