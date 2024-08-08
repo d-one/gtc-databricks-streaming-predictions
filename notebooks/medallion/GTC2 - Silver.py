@@ -88,23 +88,6 @@ wind_turbines_sdf = wind_turbines_sdf.drop(f.col("measured_at"), f.col("categori
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC
-# MAGIC Next, let's identify if we have null values and impute them.
-
-# COMMAND ----------
-
-missing_percentage=wind_turbines_sdf.select(
-    [(f.count(f.when(f.col(c).isNull(), c)) / f.count("*")).alias(c) for c in wind_turbines_sdf.columns]
-).collect()[0].asDict()
-
-# Sort the columns based on the percentage of missing values
-sorted_missing_percentage = dict(sorted(missing_percentage.items(), key=lambda item: item[1], reverse=True))
-
-sorted_missing_percentage
-
-# COMMAND ----------
-
 # MAGIC %md 
 # MAGIC
 # MAGIC It seems like only the column "subtraction" has nulls. In this case, we know that nulls mean that turbine did not have any error so we can impute it with 0.
