@@ -31,15 +31,24 @@ except:
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC Let's review the clean data
+
+# COMMAND ----------
+
 wind_turbines_clean_sdf = spark.table(f"{catalog_name}.silver.wind_turbines")
 display(wind_turbines_clean_sdf)
 
 # COMMAND ----------
 
-# set registry to your UC
-mlflow.set_registry_uri("databricks-uc")
+# MAGIC %md
+# MAGIC # Generating Live predictions in the streaming data
+# MAGIC First, let's load the pretrained model to produce our predictions
 
 # COMMAND ----------
+
+# set registry to your UC
+mlflow.set_registry_uri("databricks-uc")
 
 model_name = f"konstantinos_ninas.gold.decision_tree_ml_model" 
 model_version_uri = f"models:/{model_name}/1"
@@ -47,24 +56,39 @@ model_version_uri = f"models:/{model_name}/1"
 print(f"Loading registered model version from URI: '{model_version_uri}'")
 loaded_model = mlflow.pyfunc.load_model(model_version_uri)
 
+predict_func = mlflow.pyfunc.spark_udf(
+    spark,
+    model_version_uri)
+
 # COMMAND ----------
 
-loaded_model.predict(wind_turbines_clean_sdf.drop("wt_sk", "subtraction").toPandas())
+# MAGIC %md
+# MAGIC Following, we will apply the prediction function in our dataframe to generate the predictions 
 
 # COMMAND ----------
 
 # prepare test dataset
-test_features_df = test_df.drop("subtraction")
+wind_turbines_features_df = wind_turbines_clean_sdf.drop("subtraction")
 
 # make prediction
-prediction_df = test_features_df.withColumn("prediction", predict_func(*test_features_df.drop("wt_sk").columns))
+prediction_df = (wind_turbines_features_df
+                 .withColumn("prediction", predict_func(*wind_turbines_features_df
+                                                        .drop("wt_sk")
+                                                        .columns)
+                             )
+)
 
 display(prediction_df)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC Now, let's see the predictions alongside the actual labels
+
+# COMMAND ----------
+
 wind_turbine_predictions_sdf = (
-    test_df
+    wind_turbines_clean_sdf
     .select("wt_sk", "wind_speed", "power", "subtraction")
     .join(
         prediction_df
@@ -73,13 +97,44 @@ wind_turbine_predictions_sdf = (
     )
 )
 
-# COMMAND ----------
-
-wind_turbine_predictions_sdf.write.format("delta").mode("overwrite").saveAsTable("konstantinos_ninas.gold.wind_turbinea_predictions")
-
+wind_turbine_predictions_sdf.display()
 
 # COMMAND ----------
 
-# MAGIC %environment
-# MAGIC "client": "1"
-# MAGIC "base_environment": ""
+# MAGIC %md
+# MAGIC
+# MAGIC Finally, we can write the data in our gold table in the Unity Catalog to serve the data in a Power BI dashboard
+
+# COMMAND ----------
+
+wind_turbine_predictions_sdf.write.format("delta").mode("overwrite").saveAsTable("konstantinos_ninas.gold.wind_turbines_predictions")
+
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC Let's load the data to validate that they have been actually saved
+
+# COMMAND ----------
+
+schema_name = "gold"
+table_name = "wind_turbines_predictions"
+
+wind_turbine_predictions_sdf.write.format("delta").mode("overwrite").saveAsTable(f"{catalog_name}.{schema_name}.{table_name}")
+
+display(wind_turbine_predictions_sdf)
+
+# COMMAND ----------
+
+dbutils.notebook.exit("End of notebook when running as a workflow task")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC # Conclusion & lessons learned
+# MAGIC * In this notebook you learned how to load a trained model from the Model Registry using mlflow
+# MAGIC * To create functions on the loaded model 
+# MAGIC * Apply the functions to generate live predictions
+# MAGIC
+# MAGIC **Next:** Demo to show how to keep track of the model's prediction performance

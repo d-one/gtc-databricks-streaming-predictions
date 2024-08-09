@@ -13,6 +13,21 @@ onefile = "file:/Workspace/Repos/konstantinos.ninas@ms.d-one.ai/gtc-databricks-s
 
 # COMMAND ----------
 
+# set registry to your UC
+mlflow.set_registry_uri("databricks-uc")
+
+model_name = f"konstantinos_ninas.gold.decision_tree_ml_model" 
+model_version_uri = f"models:/{model_name}/1"
+
+print(f"Loading registered model version from URI: '{model_version_uri}'")
+loaded_model = mlflow.pyfunc.load_model(model_version_uri)
+
+predict_func = mlflow.pyfunc.spark_udf(
+    spark,
+    model_version_uri)
+
+# COMMAND ----------
+
 @dlt.table(
   name="wind_turbines_raw",
   comment="Raw inputs table",
@@ -64,9 +79,28 @@ def wind_turbines_silver():
 }
 )
 def model_predictions():
+    # load silver dataset dataset
+
+    wind_turbines_features_sdf = (dlt
+                                 .read("wind_turbines_curated")
+                                 .drop("subtraction")
+    )
+
+    # make prediction
+    prediction_sdf = (wind_turbines_features_sdf
+                    .withColumn("prediction", predict_func(*wind_turbines_features_sdf
+                                                            .drop("wt_sk")
+                                                            .columns)
+                                )
+    )
+
     return (
         dlt.read("wind_turbines_curated")
-        .withColumn("prediction", f.lit(""))
-                    # loaded_model_udf(struct(features)))
+        .select("wt_sk", "wind_speed", "power", "subtraction")
+        .join(
+          prediction_sdf
+          ,["wt_sk", "wind_speed", "power"]
+          ,"inner"
+        )
     )
 

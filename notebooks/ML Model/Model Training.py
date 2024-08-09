@@ -78,9 +78,3 @@ with mlflow.start_run(run_name="wind-turbines-decision-tree") as mlflow_run:
 # COMMAND ----------
 
 
-
-# COMMAND ----------
-
-# MAGIC %environment
-# MAGIC "client": "1"
-# MAGIC "base_environment": ""
