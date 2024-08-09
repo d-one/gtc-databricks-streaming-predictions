@@ -68,10 +68,6 @@ with mlflow.start_run(run_name="wind-turbines-decision-tree") as mlflow_run:
 
 # COMMAND ----------
 
-
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC # deployment left
 
