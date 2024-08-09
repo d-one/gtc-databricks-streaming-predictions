@@ -69,7 +69,7 @@ with mlflow.start_run(run_name="wind-turbines-decision-tree") as mlflow_run:
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # deployment left
+# MAGIC # deployment left - maybe also calculate here the data drift and use it a as a source in power bi. Streaming table - direct query in pbi
 
 # COMMAND ----------
 
