@@ -54,14 +54,15 @@ mount_point = f"/mnt/{container_name}",
 extra_configs = {f"fs.azure.account.key.{storage_account_name}.blob.core.windows.net": storage_account_access_key}
 )
 
-source_path = (f"dbfs:/mnt/{container_name}/")
-
 # COMMAND ----------
 
 # Verify the mount
 display(dbutils.fs.ls(f"/mnt/{container_name}/data"))
 
 # COMMAND ----------
+
+# specifying the path the streaming files will be found in
+source_path = (f"dbfs:/mnt/{container_name}/")
 
 # specify the expected schema of the csv files in the Blob Storage
 schema = (t.StructType()
@@ -210,7 +211,3 @@ display(wind_turbines_bronze_sdf)
 # MAGIC * Write the `wind_turbines_raw_sdf` to the table `wind_turbines_dev` using both `append` and `overwrite` to create some history.
 # MAGIC * Check the table history 
 # MAGIC   - HINT: Check out the [Describe History](https://docs.databricks.com/en/sql/language-manual/delta-describe-history.html) command
-
-# COMMAND ----------
-
-
