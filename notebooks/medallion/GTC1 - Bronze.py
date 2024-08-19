@@ -11,6 +11,8 @@
 
 # importing libraries
 import base64
+import pyspark.sql.types as t
+from utils.connection_params import *
 
 # COMMAND ----------
 
@@ -29,11 +31,11 @@ except:
 
 # COMMAND ----------
 
-# create custom path using user email
-path = f"file:/Workspace/Repos/{user_email}/gtc-databricks-streaming-predictions/data"
+# # create custom path using user email
+# path = f"file:/Workspace/Repos/{user_email}/gtc-databricks-streaming-predictions/data"
 
-# listing all files & folders in that path
-dbutils.fs.ls(path)
+# # listing all files & folders in that path
+# dbutils.fs.ls(path)
 
 # COMMAND ----------
 
@@ -42,6 +44,44 @@ specific_folder_path = f"file:/Workspace/Repos/{user_email}/gtc-databricks-strea
 
 # listing the top 5 files in a specific folder
 dbutils.fs.ls(specific_folder_path)[:5]
+
+# COMMAND ----------
+
+# Mounting the blob storage
+dbutils.fs.mount(
+source = f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/",
+mount_point = f"/mnt/{container_name}",
+extra_configs = {f"fs.azure.account.key.{storage_account_name}.blob.core.windows.net": storage_account_access_key}
+)
+
+source_path = (f"dbfs:/mnt/{container_name}/")
+
+# COMMAND ----------
+
+# Verify the mount
+display(dbutils.fs.ls(f"/mnt/{container_name}/data"))
+
+# COMMAND ----------
+
+# specify the expected schema of the csv files in the Blob Storage
+schema = (t.StructType()
+      .add("wt_sk",t.IntegerType(),True)
+      .add("measured_at",t.TimestampType(),True)
+      .add("wind_speed",t.DoubleType(),True)
+      .add("power",t.DoubleType(),True)
+      .add("nacelle_direction",t.DoubleType(),True)
+      .add("wind_direction",t.IntegerType(),True)
+      .add("rotor_speed",t.TimestampType(),True)
+      .add("generator_speed",t.DoubleType(),True)
+      .add("temp_environment",t.DoubleType(),True)
+      .add("temp_hydraulic_oil",t.DoubleType(),True)
+      .add("temp_gear_bearing",t.IntegerType(),True)
+      .add("cosphi",t.TimestampType(),True)
+      .add("blade_angle_avg",t.DoubleType(),True)
+      .add("hydraulic_pressure",t.DoubleType(),True)
+      .add("subtraction",t.DoubleType(),True)
+      .add("categories_sk",t.DoubleType(),True)
+)
 
 # COMMAND ----------
 
@@ -57,7 +97,7 @@ try:
       .option("pathGlobFilter","*.csv")
       .option("header", "true")
       .option("inferSchema", "true")
-      .load(path,header=True)
+      .load(source_path,header=True)
       )
 except:
     print("File does not exist, please make sure that your path is correct and that you have pulled the repository to databricks repos")
@@ -69,7 +109,7 @@ wind_turbines_raw_sdf.display()
 # COMMAND ----------
 
 # Define the path to the image
-image_path = "/Workspace/Repos/konstantinos.ninas@ms.d-one.ai/gtc-databricks-streaming-predictions/utils/raw_data_info.jpg"
+image_path = "/Workspace/Repos/konstantinos.ninas@ms.d-one.ai/databricks-streaming-predictions/utils/raw_data_info.jpg"
 
 # Read and encode the image to base64 (since displayHTML needs HTML input)
 with open(image_path, "rb") as image_file:
