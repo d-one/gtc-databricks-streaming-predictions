@@ -73,7 +73,7 @@ schema = (t.StructType()
 # COMMAND ----------
 
 @dlt.table(
-  name="wind_turbines_raw",
+  name=f"{catalog_name}.bronze.wind_turbines_raw",
   comment="Raw inputs table",
   table_properties={
     "quality": "bronze"
@@ -91,7 +91,7 @@ def wind_turbines_raw():
            header=True,
            multiLine=True
            )
-        .fillna(
+      .fillna(
             {
                 "subtraction": 0
             }

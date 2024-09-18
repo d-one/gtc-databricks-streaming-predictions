@@ -31,7 +31,7 @@ except:
 # COMMAND ----------
 
 @dlt.table(
-    name="wind_turbines_curated",
+  name=f"{catalog_name}.silver.wind_turbines_curated",
     comment="Post processing table",
     table_properties={
     "quality": "silver"

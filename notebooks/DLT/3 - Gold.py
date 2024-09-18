@@ -48,7 +48,7 @@ predict_func = mlflow.pyfunc.spark_udf(
 # COMMAND ----------
 
 @dlt.table(
-    name="model_predictions",
+  name=f"{catalog_name}.gold.model_predictions",
     comment="Serving table",
     table_properties={
     "quality": "gold"
