@@ -50,7 +50,7 @@ display(wind_turbines_clean_sdf)
 # set registry to your UC
 mlflow.set_registry_uri("databricks-uc")
 
-model_name = f"konstantinos_ninas.gold.decision_tree_ml_model" 
+model_name = f"{catalog_name}.gold.decision_tree_ml_model" 
 model_version_uri = f"models:/{model_name}/1"
 
 print(f"Loading registered model version from URI: '{model_version_uri}'")
@@ -107,7 +107,7 @@ wind_turbine_predictions_sdf.display()
 
 # COMMAND ----------
 
-wind_turbine_predictions_sdf.write.format("delta").mode("overwrite").saveAsTable("konstantinos_ninas.gold.wind_turbines_predictions")
+wind_turbine_predictions_sdf.write.format("delta").mode("overwrite").saveAsTable(f"{catalog_name}.gold.wind_turbines_predictions")
 
 
 # COMMAND ----------

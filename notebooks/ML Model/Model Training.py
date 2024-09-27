@@ -2,10 +2,16 @@
 import mlflow
 from sklearn.tree import DecisionTreeClassifier
 from mlflow.models import infer_signature
+from sklearn.model_selection import GridSearchCV
 
 # COMMAND ----------
 
-wind_turbines_sdf = spark.read.table("konstantinos_ninas.silver.wind_turbines")
+user_email = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
+catalog_name = user_email.split("@")[0].replace(".", "_")
+
+# COMMAND ----------
+
+wind_turbines_sdf = spark.read.table(f"{catalog_name}.silver.wind_turbines")
 
 # COMMAND ----------
 
@@ -15,6 +21,9 @@ train_df, test_df = wind_turbines_sdf.randomSplit([.8, .2], seed=42)
 # Separate features and ground-truth
 features_df = train_df.drop("subtraction")
 response_df = train_df.select("subtraction")
+
+test_features_df = test_df.drop("subtraction")
+test_response_df = test_df.select("subtraction")
 
 # COMMAND ----------
 
@@ -30,14 +39,39 @@ def get_latest_model_version(model_name):
 
 # COMMAND ----------
 
+train_df, test_df = wind_turbines_sdf.randomSplit([.8, .2], seed=42)
+
+# Separate features and ground-truth
+features_df = train_df.drop("subtraction")
+response_df = train_df.select("subtraction")
+
+test_features_df = test_df.drop("subtraction")
+test_response_df = test_df.select("subtraction")
+
 
 # Covert data to pandas dataframes
 X_train_pdf = features_df.drop("wt_sk").toPandas()
 Y_train_pdf = response_df.toPandas()
-clf = DecisionTreeClassifier(max_depth=3, random_state=42)
+
+X_test_pdf = test_features_df.drop("wt_sk").toPandas()
+Y_test_pdf = test_response_df.toPandas()
+
+clf = DecisionTreeClassifier(random_state=42)
 
 # Use 3-level namespace for model name
-model_name = f"konstantinos_ninas.gold.decision_tree_ml_model" 
+model_name = f"{catalog_name}.gold.decision_tree_ml_model" 
+
+# Define the hyperparameter grid
+param_grid = {
+    'max_depth': [5, 10, 15, None],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4],
+    'criterion': ['gini', 'entropy']
+}
+
+# Set up GridSearchCV to tune hyperparameters
+grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, 
+                           scoring='f1', cv=5, n_jobs=-1, verbose=2)
 
 with mlflow.start_run(run_name="wind-turbines-decision-tree") as mlflow_run:
 
@@ -48,12 +82,18 @@ with mlflow.start_run(run_name="wind-turbines-decision-tree") as mlflow_run:
         log_post_training_metrics=True,
         silent=True)
     
-    clf.fit(X_train_pdf, Y_train_pdf)
+    grid_search.fit(X_train_pdf, Y_train_pdf)
+
+    # Get the best estimator
+    best_clf = grid_search.best_estimator_
+
+    # Make predictions on the test set
+    y_pred = best_clf.predict(X_test_pdf)
 
     # Log model and push to registry
     signature = infer_signature(X_train_pdf, Y_train_pdf)
     mlflow.sklearn.log_model(
-        clf,
+        best_clf,
         artifact_path="decision_tree",
         signature=signature,
         registered_model_name=model_name
