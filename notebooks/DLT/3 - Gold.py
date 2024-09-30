@@ -47,6 +47,13 @@ predict_func = mlflow.pyfunc.spark_udf(
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC
+# MAGIC create or replace table konstantinos_ninas.gold.drift_detection
+# MAGIC shallow clone panagiotis_goumenakis.gold.drift_detection
+
+# COMMAND ----------
+
 @dlt.table(
   name=f"{catalog_name}.gold.model_predictions",
     comment="Serving table",
