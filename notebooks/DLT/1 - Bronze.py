@@ -38,12 +38,12 @@ container_name = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions',
 
 # COMMAND ----------
 
-# Mounting the blob storage
-dbutils.fs.mount(
-source = f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/",
-mount_point = f"/mnt/{container_name}",
-extra_configs = {f"fs.azure.account.key.{storage_account_name}.blob.core.windows.net": storage_account_access_key}
-)
+# # Mounting the blob storage
+# dbutils.fs.mount(
+# source = f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/",
+# mount_point = f"/mnt/{container_name}",
+# extra_configs = {f"fs.azure.account.key.{storage_account_name}.blob.core.windows.net": storage_account_access_key}
+# )
 
 # COMMAND ----------
 
