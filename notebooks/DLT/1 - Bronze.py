@@ -18,7 +18,7 @@ import pyspark.sql.types as t
 
 # ********* workflow parameters ********* #
 # set parameters here only if running notebook, for example:
-# dbutils.widgets.text("CATALOG_NAME", "konstantinos_ninas")
+dbutils.widgets.text("CATALOG_NAME", "konstantinos_ninas")
 
 # COMMAND ----------
 
@@ -40,7 +40,7 @@ container_name = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions',
 
 # # Mounting the blob storage
 # dbutils.fs.mount(
-# source = f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/",
+# source = f"wasbsa://{container_name}@{storage_account_name}.blob.core.windows.net/",
 # mount_point = f"/mnt/{container_name}",
 # extra_configs = {f"fs.azure.account.key.{storage_account_name}.blob.core.windows.net": storage_account_access_key}
 # )

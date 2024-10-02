@@ -17,7 +17,7 @@ import pyspark.sql.functions as f
 
 # ********* workflow parameters ********* #
 # set parameters here only if running notebook, for example:
-# dbutils.widgets.text("CATALOG_NAME", "konstantinos_ninas")
+dbutils.widgets.text("CATALOG_NAME", "konstantinos_ninas")
 
 # COMMAND ----------
 

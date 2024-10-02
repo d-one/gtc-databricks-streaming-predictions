@@ -1,4 +1,10 @@
 # Databricks notebook source
+# MAGIC %pip install mlflow
+# MAGIC %pip install azure-storage-blob
+# MAGIC %pip install azure-storage-file-datalake
+
+# COMMAND ----------
+
 # MAGIC %md 
 # MAGIC # Generating Live Predictions by utilizing Delta Live Tables (DLT) #
 # MAGIC -------------------------------------------------------------------------------------------------------
@@ -19,7 +25,7 @@ import dlt
 
 # ********* workflow parameters ********* #
 # set parameters here only if running notebook, for example:
-# dbutils.widgets.text("CATALOG_NAME", "konstantinos_ninas")
+dbutils.widgets.text("CATALOG_NAME", "konstantinos_ninas")
 
 # COMMAND ----------
 
