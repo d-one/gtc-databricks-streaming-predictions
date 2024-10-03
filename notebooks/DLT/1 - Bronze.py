@@ -73,7 +73,7 @@ schema = (t.StructType()
 # COMMAND ----------
 
 @dlt.table(
-  name=f"wind_turbines_raw",
+  name="wind_turbines_raw",
   comment="Raw inputs table",
   table_properties={
     "quality": "bronze"
@@ -98,6 +98,8 @@ def wind_turbines_raw():
             )
   )
   return wind_turbines_raw_sdf
+
+dlt.create_table(name = "wind_turbines_raw", schema = "bronze")
 
 
 # COMMAND ----------
