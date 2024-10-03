@@ -73,7 +73,7 @@ schema = (t.StructType()
 # COMMAND ----------
 
 @dlt.table(
-  name=f"{catalog_name}.bronze.wind_turbines_raw",
+  name=f"wind_turbines_raw",
   comment="Raw inputs table",
   table_properties={
     "quality": "bronze"

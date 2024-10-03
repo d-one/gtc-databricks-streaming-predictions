@@ -31,7 +31,7 @@ except:
 # COMMAND ----------
 
 @dlt.table(
-  name=f"{catalog_name}.silver.wind_turbines_curated",
+  name=f"wind_turbines_curated",
     comment="Post processing table",
     table_properties={
     "quality": "silver"
@@ -40,10 +40,10 @@ except:
 
 @dlt.expect_or_drop("valid_dates", "year(measured_at)=2020 and measured_at is not null")
 
-def wind_turbines_silver():
+def wind_turbines_curated():
   wind_turbines_silver_sdf = (
       dlt
-      .read("wind_turbines_raw")
+      .read(f"wind_turbines_raw")
       .dropDuplicates()
       .drop(f.col("categories_sk"))
   )
