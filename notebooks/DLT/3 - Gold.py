@@ -1,10 +1,4 @@
 # Databricks notebook source
-# MAGIC %pip install mlflow
-# MAGIC %pip install azure-storage-blob
-# MAGIC %pip install azure-storage-file-datalake
-
-# COMMAND ----------
-
 # MAGIC %md 
 # MAGIC # Generating Live Predictions by utilizing Delta Live Tables (DLT) #
 # MAGIC -------------------------------------------------------------------------------------------------------
@@ -53,40 +47,44 @@ predict_func = mlflow.pyfunc.spark_udf(
 
 # COMMAND ----------
 
-@dlt.table(
-  name=f"{catalog_name}.gold.model_predictions",
-    comment="Serving table",
-    table_properties={
-    "quality": "gold"
-}
+
+wind_turbines_columns = (dlt
+                        .read(f"streaming_wind_turbines_curated")
+                        .columns
 )
 
-def model_predictions():
-    # load silver dataset dataset
+# load silver dataset
+wind_turbines_features_sdf = (dlt
+                              .read(f"streaming_wind_turbines_curated")
+                              .drop("subtraction")
+)
 
-    wind_turbines_features_sdf = (dlt
-                                 .read("wind_turbines_curated")
-                                 .drop("subtraction")
+# make prediction
+prediction_sdf = (wind_turbines_features_sdf
+                .withColumn("prediction", predict_func(*wind_turbines_features_sdf
+                                                        .drop("wt_sk", "measured_at")
+                                                        .columns)
+                            )
+)
+
+output_sdf = (
+    dlt.read(f"streaming_wind_turbines_curated")
+    .select("wt_sk", "subtraction", "measured_at")
+    .join(
+      prediction_sdf
+      ,on=["wt_sk", "measured_at"]
+      ,how="inner"
     )
+    .select(*wind_turbines_columns, "prediction")
+)
 
-    # make prediction
-    prediction_sdf = (wind_turbines_features_sdf
-                    .withColumn("prediction", predict_func(*wind_turbines_features_sdf
-                                                            .drop("wt_sk", "measured_at")
-                                                            .columns)
-                                )
-    )
 
-    return (
-        dlt.read("wind_turbines_curated")
-        .select("wt_sk", "measured_at")
-        .join(
-          prediction_sdf
-          ,["wt_sk", "measured_at"]
-          ,"inner"
-        )
-    )
 
+
+# COMMAND ----------
+
+# writing the gold layer table
+output_sdf.write.mode("overwrite").saveAsTable(f"{catalog_name}.gold.wind_turbines_predictions")
 
 # COMMAND ----------
 
