@@ -30,6 +30,10 @@ except:
 
 # COMMAND ----------
 
+@dlt.view
+def wind_turbines_raw():
+  return spark.read.table(f"{catalog_name}.bronze.wind_turbines_raw")
+
 @dlt.table(
   name=f"wind_turbines_curated",
     comment="Post processing table",
@@ -43,7 +47,7 @@ except:
 def wind_turbines_curated():
   wind_turbines_silver_sdf = (
       dlt
-      .read(f"bronze.wind_turbines_raw")
+      .read(f"wind_turbines_raw")
       .dropDuplicates()
       .drop(f.col("categories_sk"))
   )
