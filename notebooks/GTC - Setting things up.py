@@ -12,7 +12,6 @@
 # importing libraries
 import base64
 import pyspark.sql.types as t
-from utils.connection_params import *
 
 # COMMAND ----------
 
