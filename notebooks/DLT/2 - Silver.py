@@ -43,7 +43,7 @@ except:
 def wind_turbines_curated():
   wind_turbines_silver_sdf = (
       dlt
-      .read(f"{catalog_name}.bronze.wind_turbines_raw")
+      .read(f"bronze.wind_turbines_raw")
       .dropDuplicates()
       .drop(f.col("categories_sk"))
   )
