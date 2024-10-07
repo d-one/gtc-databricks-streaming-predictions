@@ -47,12 +47,6 @@ predict_func = mlflow.pyfunc.spark_udf(
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC
-# MAGIC create schema konstantinos_ninas.dlt
-
-# COMMAND ----------
-
 # loading silver dataset
 wind_turbines_silver_sdf = spark.read.table(f"{catalog_name}.dlt.streaming_wind_turbines_curated")
 
