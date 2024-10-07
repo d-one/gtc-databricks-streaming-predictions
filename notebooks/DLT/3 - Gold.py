@@ -19,7 +19,7 @@ import dlt
 
 # ********* workflow parameters ********* #
 # set parameters here only if running notebook, for example:
-dbutils.widgets.text("CATALOG_NAME", "konstantinos_ninas")
+# dbutils.widgets.text("CATALOG_NAME", "konstantinos_ninas")
 
 # COMMAND ----------
 
@@ -47,35 +47,39 @@ predict_func = mlflow.pyfunc.spark_udf(
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC
+# MAGIC create schema konstantinos_ninas.dlt
 
-wind_turbines_columns = (dlt
-                        .read(f"streaming_wind_turbines_curated")
-                        .columns
-)
+# COMMAND ----------
 
-# load silver dataset
-wind_turbines_features_sdf = (dlt
-                              .read(f"streaming_wind_turbines_curated")
-                              .drop("subtraction")
-)
+# loading silver dataset
+wind_turbines_silver_sdf = spark.read.table(f"{catalog_name}.dlt.streaming_wind_turbines_curated")
 
-# make prediction
-prediction_sdf = (wind_turbines_features_sdf
-                .withColumn("prediction", predict_func(*wind_turbines_features_sdf
+# defining all columns to be selected
+columns_to_be_selected = wind_turbines_silver_sdf.columns
+
+# dropping the label, to produce predictions
+wind_turbines_clean_sdf = wind_turbines_silver_sdf.drop("subtraction")
+
+# produce prediction on new data
+prediction_sdf = (wind_turbines_clean_sdf
+                .withColumn("prediction", predict_func(*columns_to_be_selected
                                                         .drop("wt_sk", "measured_at")
                                                         .columns)
                             )
 )
 
+# create a table that includes both the label and the prediction to make it available downstream
 output_sdf = (
-    dlt.read(f"streaming_wind_turbines_curated")
+    wind_turbines_silver_sdf
     .select("wt_sk", "subtraction", "measured_at")
     .join(
       prediction_sdf
       ,on=["wt_sk", "measured_at"]
       ,how="inner"
     )
-    .select(*wind_turbines_columns, "prediction")
+    .select(*columns_to_be_selected, "prediction")
 )
 
 
@@ -84,14 +88,18 @@ output_sdf = (
 # COMMAND ----------
 
 # writing the gold layer table
-output_sdf.write.mode("overwrite").saveAsTable(f"{catalog_name}.gold.wind_turbines_predictions")
+tableExists=spark.catalog.tableExists(f"{catalog_name}.dlt.wind_turbines_predictions")
+if tableExists:
+    output_sdf.write.mode("overwrite").saveAsTable(f"{catalog_name}.dlt.wind_turbines_predictions")
+else:
+    output_sdf.write.mode("append").saveAsTable(f"{catalog_name}.dlt.wind_turbines_predictions")
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC # Conclusion & lessons learned
 # MAGIC * In this notebook you learned how to load a trained model from the Model Registry using mlflow
-# MAGIC * To create functions on the loaded model 
+# MAGIC * To create user-defined-functions (udf) on the loaded model
 # MAGIC * Apply the functions to generate live predictions
 # MAGIC
 # MAGIC **Next:** Demo to show how to keep track of the model's prediction performance
