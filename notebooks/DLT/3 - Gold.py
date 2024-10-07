@@ -48,7 +48,7 @@ predict_func = mlflow.pyfunc.spark_udf(
 # COMMAND ----------
 
 # loading silver dataset
-wind_turbines_silver_sdf = spark.read.table(f"{catalog_name}.silver.streaming_wind_turbines_curated")
+wind_turbines_silver_sdf = spark.read.table(f"{catalog_name}.silver.wind_turbines_curated")
 
 # defining all columns to be selected
 columns_to_be_selected = wind_turbines_silver_sdf.columns
