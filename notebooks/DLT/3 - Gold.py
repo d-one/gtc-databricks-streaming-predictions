@@ -58,7 +58,7 @@ wind_turbines_clean_sdf = wind_turbines_silver_sdf.drop("subtraction")
 
 # produce prediction on new data
 prediction_sdf = (wind_turbines_clean_sdf
-                .withColumn("prediction", predict_func(*columns_to_be_selected
+                .withColumn("prediction", predict_func(*wind_turbines_clean_sdf
                                                         .drop("wt_sk", "measured_at")
                                                         .columns)
                             )
