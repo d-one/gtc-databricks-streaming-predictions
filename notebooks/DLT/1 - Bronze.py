@@ -99,8 +99,6 @@ def wind_turbines_raw():
   )
   return wind_turbines_raw_sdf
 
-dlt.create_table(name = "wind_turbines_raw", schema = "bronze")
-
 
 # COMMAND ----------
 
