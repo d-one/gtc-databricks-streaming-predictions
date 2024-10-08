@@ -62,7 +62,7 @@ def wind_turbines_curated():
 # MAGIC
 # MAGIC Try enriching the above step of the medallion architecture by providing expectations on the data to ensure data quality.
 # MAGIC Specifically:
-# MAGIC   - For the column wind_speed, only allow values within the range of 0-1
+# MAGIC   - For the column power, only allow values within the range of 0-1
 # MAGIC   - For the column rotor_speed, only allow positive values (>0)
 # MAGIC   - The wind turbines we are tracking have the ids 1, 2, 3 & 4. Also, they should not be null. We should only allow generators with those values to pass.
 # MAGIC   - For the column subtraction (our prediction target) we only want to allow values 0 & 1. If we receive any other value, we should stop the pipeline. hint: use @dlt.expect_or_fail() function

@@ -101,16 +101,3 @@ with mlflow.start_run(run_name="wind-turbines-decision-tree") as mlflow_run:
 
     # Set model alias (i.e. Baseline)
     client.set_registered_model_alias(model_name, "Baseline", get_latest_model_version(model_name))
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC # deployment left - maybe also calculate here the data drift and use it a as a source in power bi. Streaming table - direct query in pbi
-
-# COMMAND ----------
-
-

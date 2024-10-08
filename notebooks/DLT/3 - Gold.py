@@ -35,7 +35,7 @@ except:
 # set registry to your UC
 mlflow.set_registry_uri("databricks-uc")
 
-model_name = f"{catalog_name}.gold.decision_tree_ml_model" 
+model_name = f"konstantinos_ninas.gold.decision_tree_ml_model" 
 model_version_uri = f"models:/{model_name}/1"
 
 print(f"Loading registered model version from URI: '{model_version_uri}'")

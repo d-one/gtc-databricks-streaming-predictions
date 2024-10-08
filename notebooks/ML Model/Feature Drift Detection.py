@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore")
 
 # DBTITLE 1,Read Data
 user_email = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
-path = f"file:/Workspace/Repos/{user_email}/gtc-databricks-streaming-predictions/data"
+path = f"file:/Workspace/Repos/{user_email}/databricks-streaming-predictions/data"
 batch0 = [f"{path}/batch0/2020/1/"]
 batch1 = [f"{path}/batch1/2020/{str(i)}/" for i in range(1, 4)]
 batch2 = [f"{path}/batch2/2020/{str(i)}/" for i in range(1, 7)]
@@ -32,7 +32,7 @@ for batch in [batch0, batch1, batch2]:
 
 # COMMAND ----------
 
-historical_data = data['batch1']
+historical_data = pd.concat([data['batch0'],data['batch1']])
 streaming_data = data['batch2']
 features = [col for col in historical_data.columns if col not in ["subtraction", "measured_at", "wt_sk"]]
 
@@ -126,3 +126,13 @@ drift_sdf = (
     .withColumn("drift_detected", f.when((f.col("psi") > psi_drift_threshold) & (f.col("kl_divergence") > kl_drift_threshold), 1).otherwise(0))
     .withColumn("drift_detected", f.col("drift_detected").cast(BooleanType()))
 )
+
+# COMMAND ----------
+
+display(
+    drift_sdf
+)
+
+# COMMAND ----------
+
+
