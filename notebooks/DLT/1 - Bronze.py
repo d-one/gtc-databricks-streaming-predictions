@@ -31,24 +31,9 @@ except:
 
 # COMMAND ----------
 
-# receive secrets to access the storage container of the data
-storage_account_access_key = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='storage_account_access_key')
-storage_account_name = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='storage_account_name')
-container_name = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='container_name')
-
-# COMMAND ----------
-
-# # Mounting the blob storage
-# dbutils.fs.mount(
-# source = f"wasbsa://{container_name}@{storage_account_name}.blob.core.windows.net/",
-# mount_point = f"/mnt/{container_name}",
-# extra_configs = {f"fs.azure.account.key.{storage_account_name}.blob.core.windows.net": storage_account_access_key}
-# )
-
-# COMMAND ----------
-
 # specifying the path the streaming files will be found in
-source_path = (f"dbfs:/mnt/{container_name}/")
+container_name = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='container_name')
+source_path = (f"dbfs:/mnt/{container_name}/data/batch0")
 
 # specify the expected schema of the csv files in the Blob Storage
 schema = (t.StructType()
@@ -96,6 +81,7 @@ def wind_turbines_raw():
                 "subtraction": 0
             }
             )
+      .withColumn("load_timestamp", f.current_timestamp())
   )
   return wind_turbines_raw_sdf
 

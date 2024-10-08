@@ -50,7 +50,7 @@ extra_configs = {f"fs.azure.account.key.{storage_account_name}.blob.core.windows
 # COMMAND ----------
 
 # Verify the mount
-display(dbutils.fs.ls(f"/mnt/{container_name}/data"))
+display(dbutils.fs.ls(f"/mnt/{container_name}/data/batch2/2020"))
 
 # COMMAND ----------
 
