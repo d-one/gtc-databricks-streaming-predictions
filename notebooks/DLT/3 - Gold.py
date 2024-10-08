@@ -84,9 +84,9 @@ output_sdf = (
 # writing the gold layer table
 tableExists=spark.catalog.tableExists(f"{catalog_name}.gold.wind_turbines_predictions")
 if tableExists:
-    output_sdf.write.mode("overwrite").saveAsTable(f"{catalog_name}.gold.wind_turbines_predictions")
-else:
     output_sdf.write.mode("append").saveAsTable(f"{catalog_name}.gold.wind_turbines_predictions")
+else:
+    output_sdf.write.mode("overwrite").saveAsTable(f"{catalog_name}.gold.wind_turbines_predictions")
 
 # COMMAND ----------
 

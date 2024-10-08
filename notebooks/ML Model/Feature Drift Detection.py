@@ -8,12 +8,28 @@ warnings.filterwarnings("ignore")
 
 # COMMAND ----------
 
+wind_turbine_gold_sdf = spark.read.table("konstantinos_ninas.gold.wind_turbines_predictions")
+latest_batch_timestamp = (
+    wind_turbine_gold_sdf
+    .select(f.max("load_timestamp").alias("max_timestamp"))
+)
+previous_batch_timestamp = (
+    wind_turbine_gold_sdf
+    .join(
+        latest_batch_timestamp,
+        [latest_batch_timestamp["max_timestamp"] != wind_turbine_gold_sdf["load_timestamp"],]
+    )
+    .select(f.max("load_timestamp"))
+    )
+
+# COMMAND ----------
+
+wind_turbine_gold_sdf.select("load_timestamp").dropDuplicates().display()
+
+# COMMAND ----------
+
 # DBTITLE 1,Read Data
-user_email = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
-path = f"file:/Workspace/Repos/{user_email}/databricks-streaming-predictions/data"
-batch0 = [f"{path}/batch0/2020/1/"]
-batch1 = [f"{path}/batch1/2020/{str(i)}/" for i in range(1, 4)]
-batch2 = [f"{path}/batch2/2020/{str(i)}/" for i in range(1, 7)]
+wind_turbine_gold_sdf = spark.read.table("konstantinos_ninas.gold.wind_turbines_predictions")
 
 i=0
 data = {}
@@ -32,7 +48,7 @@ for batch in [batch0, batch1, batch2]:
 
 # COMMAND ----------
 
-historical_data = pd.concat([data['batch0'],data['batch1']])
+historical_data = data['batch0']
 streaming_data = data['batch2']
 features = [col for col in historical_data.columns if col not in ["subtraction", "measured_at", "wt_sk"]]
 
@@ -135,4 +151,5 @@ display(
 
 # COMMAND ----------
 
-
+# writing the results of drift detection
+drift_sdf.write.mode("overwrite").saveAsTable("konstantinos_ninas.gold.drift_detection")
