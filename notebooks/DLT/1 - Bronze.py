@@ -33,7 +33,7 @@ except:
 
 # specifying the path the streaming files will be found in
 container_name = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='container_name')
-source_path = (f"dbfs:/mnt/{container_name}/data/batch1")
+source_path = (f"dbfs:/mnt/{container_name}/data/batch2")
 
 # specify the expected schema of the csv files in the Blob Storage
 schema = (t.StructType()

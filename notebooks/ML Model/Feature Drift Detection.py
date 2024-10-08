@@ -8,6 +8,7 @@ warnings.filterwarnings("ignore")
 
 # COMMAND ----------
 
+# reading the last 2 versions of our golden table
 wind_turbine_gold_sdf = spark.read.table("konstantinos_ninas.gold.wind_turbines_predictions")
 latest_batch_timestamp = (
     wind_turbine_gold_sdf
@@ -19,38 +20,32 @@ previous_batch_timestamp = (
         latest_batch_timestamp,
         [latest_batch_timestamp["max_timestamp"] != wind_turbine_gold_sdf["load_timestamp"],]
     )
-    .select(f.max("load_timestamp"))
+    .select(f.max("load_timestamp").alias("max_timestamp"))
     )
 
 # COMMAND ----------
 
-wind_turbine_gold_sdf.select("load_timestamp").dropDuplicates().display()
-
-# COMMAND ----------
-
-# DBTITLE 1,Read Data
-wind_turbine_gold_sdf = spark.read.table("konstantinos_ninas.gold.wind_turbines_predictions")
-
-i=0
-data = {}
-for batch in [batch0, batch1, batch2]:
-    dfs = []
-    for path in batch:
-        files_info = dbutils.fs.ls(path)
-        csv_files = [file_info.path for file_info in files_info if file_info.path.endswith(".csv")]
-
-        for file in csv_files:
-            df = pd.read_csv(file)
-            dfs.append(df)
-    final_df = pd.concat(dfs, ignore_index=True)
-    data[f"batch{i}"] = final_df
-    i+=1
-
-# COMMAND ----------
-
-historical_data = data['batch0']
-streaming_data = data['batch2']
-features = [col for col in historical_data.columns if col not in ["subtraction", "measured_at", "wt_sk"]]
+historical_data = (
+    wind_turbine_gold_sdf
+    .join(
+        previous_batch_timestamp
+        .withColumnRenamed("max_timestamp", "load_timestamp"),
+        "load_timestamp",
+        "inner"
+    )
+    .toPandas()
+)
+streaming_data = (
+    wind_turbine_gold_sdf
+    .join(
+        latest_batch_timestamp
+        .withColumnRenamed("max_timestamp", "load_timestamp"),
+        "load_timestamp",
+        "inner"
+    )
+    .toPandas()
+)
+features = [col for col in historical_data.columns if col not in ["subtraction", "measured_at", "wt_sk", "prediction", "load_timestamp"]]
 
 # COMMAND ----------
 
@@ -141,12 +136,6 @@ drift_sdf = (
     spark.createDataFrame(data_list, schema=schema)
     .withColumn("drift_detected", f.when((f.col("psi") > psi_drift_threshold) & (f.col("kl_divergence") > kl_drift_threshold), 1).otherwise(0))
     .withColumn("drift_detected", f.col("drift_detected").cast(BooleanType()))
-)
-
-# COMMAND ----------
-
-display(
-    drift_sdf
 )
 
 # COMMAND ----------
