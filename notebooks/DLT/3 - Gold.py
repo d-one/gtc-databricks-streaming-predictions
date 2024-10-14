@@ -34,9 +34,17 @@ except:
 
 # set registry to your UC
 mlflow.set_registry_uri("databricks-uc")
+client = mlflow.MlflowClient()
 
-model_name = f"konstantinos_ninas.gold.decision_tree_ml_model" 
-model_version_uri = f"models:/{model_name}/1"
+# helper function that we will use for getting latest version of a model
+def get_latest_model_version(model_name):
+    """Helper function to get latest model version"""
+    model_version_infos = client.search_model_versions("name = '%s'" % model_name)
+    return max([model_version_info.version for model_version_info in model_version_infos])
+
+model_name = f"konstantinos_ninas.gold.decision_tree_ml_model"
+latest_version = get_latest_model_version(model_name)
+model_version_uri = f"models:/{model_name}/{latest_version}"
 
 print(f"Loading registered model version from URI: '{model_version_uri}'")
 loaded_model = mlflow.pyfunc.load_model(model_version_uri)
