@@ -15,21 +15,9 @@ import pyspark.sql.functions as f
 
 # COMMAND ----------
 
-# ********* workflow parameters ********* #
-# set parameters here only if running notebook, for example:
-dbutils.widgets.text("CATALOG_NAME", "konstantinos_ninas")
-
-# COMMAND ----------
-
-# set up catalog name either by workflow parameters or by using current user's id
-user_email = spark.sql('select current_user() as user').collect()[0]['user']
-catalog_name = user_email.split('@')[0].replace(".", "_").replace("-", "_")
-
-# COMMAND ----------
-
 @dlt.view
 def wind_turbines_raw():
-  return spark.read.table(f"{catalog_name}.bronze.wind_turbines_raw")
+  return spark.read.table("bronze.wind_turbines_raw")
 
 @dlt.table(
   name=f"wind_turbines_curated",
@@ -40,6 +28,7 @@ def wind_turbines_raw():
 )
 
 @dlt.expect_or_drop("valid_dates", "year(measured_at)=2020 and measured_at is not null")
+@dlt.expect_or_fail("valid_label", "subtraction in (0, 1)")
 
 def wind_turbines_curated():
   wind_turbines_silver_sdf = (
@@ -61,7 +50,7 @@ def wind_turbines_curated():
 # MAGIC Specifically:
 # MAGIC   - For the column power, only allow values within the range of 0-1
 # MAGIC   - For the column rotor_speed, only allow positive values (>0)
-# MAGIC   - The wind turbines we are tracking have the ids 1, 2, 3 & 4. Also, they should not be null. We should only allow generators with those values to pass.
+# MAGIC   - The wind turbines we are tracking have the ids (wt_sk) 1, 2, 3 & 4. Also, they should not be null. We should only allow generators with those values to pass.
 # MAGIC   - For the column subtraction (our prediction target) we only want to allow values 0 & 1. If we receive any other value, we should stop the pipeline. hint: use @dlt.expect_or_fail() function
 # MAGIC
 # MAGIC _In any occurence of a violation of the above constraints, we need to drop these rows so as to exclude them from being included downstream._
@@ -69,6 +58,18 @@ def wind_turbines_curated():
 # MAGIC Hint 1: You should stop running the DLT pipeline to apply these changes
 # MAGIC
 # MAGIC Hint 2: You should use the @dlt.expect_or_drop function
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Solution
+
+# COMMAND ----------
+
+# @dlt.expect_or_drop("valid_power", "power >=0 and power <=1")
+# @dlt.expect_or_drop("valid_rotor_speed", "rotor_speed >=0")
+# @dlt.expect_or_drop("valid_wt_sk", "wt_sk in (1,2,3,4)")
+# @dlt.expect_or_fail("valid_label", "subtraction in (0, 1)")
 
 # COMMAND ----------
 

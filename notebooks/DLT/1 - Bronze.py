@@ -16,12 +16,6 @@ import pyspark.sql.types as t
 
 # COMMAND ----------
 
-# set up catalog name either by workflow parameters or by using current user's id
-user_email = spark.sql('select current_user() as user').collect()[0]['user']
-catalog_name = user_email.split('@')[0].replace(".", "_").replace("-", "_")
-
-# COMMAND ----------
-
 # specifying the path the streaming files will be found in
 container_name = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='container_name')
 source_path = (f"dbfs:/mnt/{container_name}/data/batch2")
