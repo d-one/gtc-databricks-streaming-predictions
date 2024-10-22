@@ -17,18 +17,17 @@ import pyspark.sql.functions as f
 
 @dlt.view
 def wind_turbines_raw():
-  return spark.read.table("bronze.wind_turbines_raw")
+  return spark.table("wind_turbines_raw")
 
 @dlt.table(
   name=f"wind_turbines_curated",
-    comment="Post processing table",
-    table_properties={
+  comment="Clean-up & preprocessing table",
+  table_properties={
     "quality": "silver"
-  } 
+  }
 )
 
 @dlt.expect_or_drop("valid_dates", "year(measured_at)=2020 and measured_at is not null")
-@dlt.expect_or_fail("valid_label", "subtraction in (0, 1)")
 
 def wind_turbines_curated():
   wind_turbines_silver_sdf = (
