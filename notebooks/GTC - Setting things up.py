@@ -25,23 +25,30 @@ catalog_name = user_email.split('@')[0].replace(".", "_").replace("-", "_")
 storage_account_access_key = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='storage_account_access_key')
 storage_account_name = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='storage_account_name')
 container_name = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='container_name')
+sas_token = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='sas_token')
 
 # specifying the path the streaming files will be found in
-source_path = (f"dbfs:/mnt/{container_name}/")
+source_path = (f"/mnt/{container_name}/")
+
+# Create the source URL with the SAS token
+source_url = f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/"
 
 # COMMAND ----------
 
-# Mounting the blob storage
-dbutils.fs.mount(
-source = f"wasbs://{container_name}@{storage_account_name}.blob.core.windows.net/",
-mount_point = f"/mnt/{container_name}",
-extra_configs = {f"fs.azure.account.key.{storage_account_name}.blob.core.windows.net": storage_account_access_key}
-)
+# Mount the storage
+try:
+  dbutils.fs.mount(
+    source = source_url,
+    mount_point = source_path,
+    extra_configs = {f"fs.azure.sas.{container_name}.{storage_account_name}.blob.core.windows.net": sas_token}
+  )
+  print("Blob storage succesfully mounted to dbfs")
+except:
+  print("Blob already mounted!")
 
 # COMMAND ----------
 
-# Verify the mount
-display(dbutils.fs.ls(f"/mnt/{container_name}/data/batch2/2020"))
+display(dbutils.fs.ls("/mnt/{container_name}/data/batch2/2020/"))
 
 # COMMAND ----------
 
@@ -57,7 +64,7 @@ try:
       .option("pathGlobFilter","*.csv")
       .option("header", "true")
       .option("inferSchema", "true")
-      .load(source_path,header=True)
+      .load(f"dbfs:{source_path}",header=True)
       )
 except:
     print("File does not exist, please make sure that your path is correct and that you have pulled the repository to databricks repos")
