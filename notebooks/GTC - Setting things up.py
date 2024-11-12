@@ -76,7 +76,7 @@ wind_turbines_raw_sdf.display()
 # COMMAND ----------
 
 # Define the path to the image
-image_path = f"/Workspace/Users/{user_email}/databricks-streaming-predictions/utils/raw_data_info.jpg"
+image_path = f"/Workspace/Users/{user_email}/gtc-databricks-streaming-predictions/utils/raw_data_info.jpg"
 
 # Read and encode the image to base64 (since displayHTML needs HTML input)
 with open(image_path, "rb") as image_file:
