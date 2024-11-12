@@ -2,9 +2,9 @@
 # MAGIC %md 
 # MAGIC # Generating Live Predictions by utilizing Delta Live Tables (DLT)
 # MAGIC -------------------------------------------------------------------------------------------------------
-# MAGIC ## Data ingestion
+# MAGIC ## Setting things up
 # MAGIC -------------------------------------------------------------------------------------------------------
-# MAGIC ##### This is the first part of the DLT pipeline that we are going to build. Starting, we will create the bronze table of the medallion architecture where we will ingest the streaming data in the unity catalog in a streaming delta table.
+# MAGIC ##### In this notebook, we configure access to the data storage and securely mount the required data sources.
 # MAGIC -------------------------------------------------------------------------------------------------------
 
 # COMMAND ----------
