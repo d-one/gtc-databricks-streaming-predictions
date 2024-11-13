@@ -9,14 +9,13 @@
 
 # COMMAND ----------
 
-# importing all the necessary libraries
-import dlt
-import pyspark.sql.functions as f
+# MAGIC %run ../utils/Retrieving_catalog_name
 
 # COMMAND ----------
 
-# retrieving current users catalog name
-%run ../utils/Retrieving_catalog_name
+# importing all the necessary libraries
+import dlt
+import pyspark.sql.functions as f
 
 # COMMAND ----------
 
