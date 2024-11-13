@@ -131,7 +131,7 @@ os.makedirs(util_dir, exist_ok=True)
 
 # Content for config.py
 config_content = f"""
-sample_variable = "{catalog_name}"
+catalog_name = "{catalog_name}"
 """
 
 init_content = f""
