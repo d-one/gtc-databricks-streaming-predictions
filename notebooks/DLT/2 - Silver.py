@@ -15,9 +15,14 @@ import pyspark.sql.functions as f
 
 # COMMAND ----------
 
+# retrieving current users catalog name
+%run ../utils/Retrieving_catalog_name
+
+# COMMAND ----------
+
 @dlt.view
 def wind_turbines_raw():
-  return spark.table("wind_turbines_raw")
+  return spark.table(f"{catalog_name}.bronze.wind_turbines_raw")
 
 @dlt.table(
   name=f"wind_turbines_curated",
