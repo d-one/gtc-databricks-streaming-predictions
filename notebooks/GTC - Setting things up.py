@@ -143,15 +143,3 @@ with open(util_file, 'w+') as f:
 # Write config.py
 with open(init_file, 'w+') as f:
     f.write(init_content)
-
-# COMMAND ----------
-
-util_file
-
-# COMMAND ----------
-
-config_content
-
-# COMMAND ----------
-
-
