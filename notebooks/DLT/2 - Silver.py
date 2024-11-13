@@ -12,7 +12,7 @@
 # importing all the necessary libraries
 import dlt
 import pyspark.sql.functions as f
-from notebooks.utils.config import sample_variable
+from notebooks.utils.config import catalog_name
 
 # COMMAND ----------
 
