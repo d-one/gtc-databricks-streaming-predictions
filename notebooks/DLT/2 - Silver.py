@@ -9,7 +9,15 @@
 
 # COMMAND ----------
 
-# MAGIC %run ../utils/Retrieving_catalog_name
+# load_util_file.py
+
+import os
+
+# Import the variable from notebooks.utils.config
+from utils.config import sample_variable
+
+# Use the imported variable
+print(sample_variable)
 
 # COMMAND ----------
 

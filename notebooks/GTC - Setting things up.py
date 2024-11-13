@@ -12,6 +12,7 @@
 # importing libraries
 import base64
 import pyspark.sql.types as t
+import os
 
 # COMMAND ----------
 
@@ -115,3 +116,42 @@ for schema_name in schemas_needed:
         """
     )
     print(f"{schema_name} schema created under {catalog_name} catalog")
+
+# COMMAND ----------
+
+# store a file containing your catalog name to use in the dlt pipelines
+
+# Define the directory and file paths
+util_dir = '../notebooks/utils'
+util_file = os.path.join(util_dir, "config.py")
+init_file = os.path.join(util_dir, "__init__.py")
+
+# Make sure the directory exists
+os.makedirs(util_dir, exist_ok=True)
+
+# Content for config.py
+config_content = f"""
+sample_variable = "{catalog_name}"
+"""
+
+init_content = f""
+
+# Write config.py
+with open(util_file, 'w+') as f:
+    f.write(config_content)
+
+# Write config.py
+with open(init_file, 'w+') as f:
+    f.write(init_content)
+
+# COMMAND ----------
+
+util_file
+
+# COMMAND ----------
+
+config_content
+
+# COMMAND ----------
+
+
