@@ -17,8 +17,7 @@ import pyspark.sql.types as t
 # COMMAND ----------
 
 # specifying the path the streaming files will be found in
-container_name = dbutils.secrets.get(scope='gtc-workshop-streaming-predictions', key='container_name')
-source_path = (f"dbfs:/mnt/{container_name}/data/batch2")
+source_path = (f"/Volumes/konstantinos_ninas/bronze/wind_turbine_raw_volume/data/batch2/2020")
 
 # specify the expected schema of the csv files in the Blob Storage
 schema = (t.StructType()
