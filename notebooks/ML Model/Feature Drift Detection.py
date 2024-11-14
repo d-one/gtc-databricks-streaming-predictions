@@ -8,8 +8,17 @@ warnings.filterwarnings("ignore")
 
 # COMMAND ----------
 
+# set up catalog name either by workflow parameters or by using current user's id
+user_email = spark.sql('select current_user() as user').collect()[0]['user']
+try:
+    catalog_name = dbutils.widgets.get("CATALOG_NAME")
+except:
+    catalog_name = user_email.split('@')[0].replace(".", "_").replace("-", "_")
+
+# COMMAND ----------
+
 # reading the last 2 versions of our golden table
-wind_turbine_gold_sdf = spark.read.table("konstantinos_ninas.gold.wind_turbines_predictions")
+wind_turbine_gold_sdf = spark.read.table(f"{catalog_name}.gold.wind_turbines_predictions")
 latest_batch_timestamp = (
     wind_turbine_gold_sdf
     .select(f.max("load_timestamp").alias("max_timestamp"))
@@ -141,4 +150,4 @@ drift_sdf = (
 # COMMAND ----------
 
 # writing the results of drift detection
-drift_sdf.write.mode("overwrite").saveAsTable("konstantinos_ninas.gold.drift_detection")
+drift_sdf.write.mode("overwrite").saveAsTable(f"{catalog_name}.gold.drift_detection")
